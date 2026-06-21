@@ -35,8 +35,14 @@ DIFICULDADES = {
 }
 
 CAMINHO_RECORDE = "data/recorde.txt"
-CAMINHO_NAVE = "assets/imagens/nave.png"
-CAMINHO_METEORO = "assets/imagens/meteoro.png"
+CAMINHO_NAVE = "assets/imagens/ship1.png"
+CAMINHO_NAVE2 = "assets/imagens/ship2.png"
+CAMINHO_METEOROS = [
+    "assets/imagens/meteoro1.png",
+    "assets/imagens/meteoro2.png",
+    "assets/imagens/meteoro3.png",
+    "assets/imagens/meteoro4.png",
+]
 CAMINHO_FUNDO = "assets/imagens/fundo.png"
 
 # Multiplayer

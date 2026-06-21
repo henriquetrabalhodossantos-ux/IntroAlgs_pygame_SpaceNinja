@@ -7,7 +7,7 @@ from src.config import (
     AZUL_ESCURO, BRANCO, VERMELHO, AMARELO,
     VELOCIDADE_JOGADOR, VIDAS_INICIAIS,
     INTERVALO_METEORO_INICIAL, INTERVALO_METEORO_MINIMO, REDUCAO_INTERVALO,
-    CAMINHO_NAVE, CAMINHO_METEORO, CAMINHO_FUNDO,
+    CAMINHO_NAVE, CAMINHO_NAVE2, CAMINHO_METEOROS, CAMINHO_FUNDO,
     CAMINHO_SOM_COLISAO, CAMINHO_SOM_LEVEL_UP, CAMINHO_SOM_GAME_OVER, CAMINHO_MUSICA,
     DIFICULDADES,
     VELOCIDADE_JOGADOR_2, DISTANCIA_REVIVE, TEMPO_REVIVE, TEMPO_CORPO,
@@ -21,17 +21,22 @@ TAMANHO_METEORO_BASE = 45
 
 
 def _carregar_imagens():
-    """Tenta carregar imagens separadas; retorna None se falhar."""
+    """Tenta carregar imagens; retorna None se falhar."""
     try:
         nave = pygame.image.load(CAMINHO_NAVE).convert_alpha()
         nave = pygame.transform.scale(nave, TAMANHO_NAVE)
-        meteoro = pygame.image.load(CAMINHO_METEORO).convert_alpha()
-        meteoro = pygame.transform.scale(meteoro, (TAMANHO_METEORO_BASE, TAMANHO_METEORO_BASE))
+        nave2 = pygame.image.load(CAMINHO_NAVE2).convert_alpha()
+        nave2 = pygame.transform.scale(nave2, TAMANHO_NAVE)
+        meteoros = []
+        for caminho in CAMINHO_METEOROS:
+            img = pygame.image.load(caminho).convert_alpha()
+            img = pygame.transform.scale(img, (TAMANHO_METEORO_BASE, TAMANHO_METEORO_BASE))
+            meteoros.append(img)
         fundo = pygame.image.load(CAMINHO_FUNDO).convert()
         fundo = pygame.transform.scale(fundo, (LARGURA_TELA, ALTURA_TELA))
-        return nave, meteoro, fundo
+        return nave, nave2, meteoros, fundo
     except Exception:
-        return None, None, None
+        return None, None, [], None
 
 
 def _resolver_som(caminho_ogg):
@@ -408,12 +413,11 @@ def _processar_colisoes(jogador, meteoros, particulas, sons, agora):
     return meteoros
 
 
-def _loop_competicao(tela, relogio, fonte, fonte_grande, imagem_nave, imagem_meteoro,
+def _loop_competicao(tela, relogio, fonte, fonte_grande, imagem_nave, imagem_nave2, imagens_meteoro,
                      imagem_fundo, sons, nome1, nome2, dificuldade,
                      vel_min, vel_max, interv_inicial, interv_min, reducao, pts_por_segundo):
     jogador1 = _novo_jogo(imagem_nave, "esquerda")
-    jogador2 = _novo_jogo(imagem_nave, "direita")
-    nave2_img = pygame.transform.flip(imagem_nave, False, True) if imagem_nave else None
+    jogador2 = _novo_jogo(imagem_nave2, "direita")
 
     meteoros, particulas = [], []
     intervalo_meteoro = interv_inicial
@@ -503,7 +507,7 @@ def _loop_competicao(tela, relogio, fonte, fonte_grande, imagem_nave, imagem_met
         else:
             tela.fill(AZUL_ESCURO)
 
-        desenhar_meteoros(tela, meteoros, imagem_meteoro)
+        desenhar_meteoros(tela, meteoros, imagens_meteoro)
         _atualizar_e_desenhar_particulas(tela, particulas)
 
         if not jogador_perdeu(jogador1["vidas"]):
@@ -513,7 +517,7 @@ def _loop_competicao(tela, relogio, fonte, fonte_grande, imagem_nave, imagem_met
         if not jogador_perdeu(jogador2["vidas"]):
             tr2 = jogador2["invencivel_ate"] - agora
             if tr2 <= 0 or tr2 <= 1000 or (agora // 50) % 2 == 0:
-                _desenhar_jogador(tela, jogador2, nave2_img)
+                _desenhar_jogador(tela, jogador2, imagem_nave2)
 
         _desenhar_hud_vs(tela, fonte, jogador1, nome1, jogador2, nome2, level, dificuldade)
 
@@ -544,12 +548,11 @@ def _desenhar_hud_coop(tela, fonte, pontos, vidas1, nome1, vidas2, nome2, level,
               (LARGURA_TELA // 2 - 110, 10))
 
 
-def _loop_cooperativo(tela, relogio, fonte, fonte_grande, imagem_nave, imagem_meteoro,
+def _loop_cooperativo(tela, relogio, fonte, fonte_grande, imagem_nave, imagem_nave2, imagens_meteoro,
                       imagem_fundo, sons, nome1, nome2, dificuldade,
                       vel_min, vel_max, interv_inicial, interv_min, reducao, pts_por_segundo):
     jogador1 = _novo_jogo(imagem_nave, "esquerda")
-    jogador2 = _novo_jogo(imagem_nave, "direita")
-    nave2_img = pygame.transform.flip(imagem_nave, False, True) if imagem_nave else None
+    jogador2 = _novo_jogo(imagem_nave2, "direita")
 
     meteoros, particulas = [], []
     intervalo_meteoro = interv_inicial
@@ -678,7 +681,7 @@ def _loop_cooperativo(tela, relogio, fonte, fonte_grande, imagem_nave, imagem_me
         else:
             tela.fill(AZUL_ESCURO)
 
-        desenhar_meteoros(tela, meteoros, imagem_meteoro)
+        desenhar_meteoros(tela, meteoros, imagens_meteoro)
         _atualizar_e_desenhar_particulas(tela, particulas)
 
         # Desenha corpos
@@ -707,7 +710,7 @@ def _loop_cooperativo(tela, relogio, fonte, fonte_grande, imagem_nave, imagem_me
         if not jogador_perdeu(jogador2["vidas"]):
             tr2 = jogador2["invencivel_ate"] - agora
             if tr2 <= 0 or tr2 <= 1000 or (agora // 50) % 2 == 0:
-                _desenhar_jogador(tela, jogador2, nave2_img)
+                _desenhar_jogador(tela, jogador2, imagem_nave2)
 
         _desenhar_hud_coop(tela, fonte, pontos_coop, jogador1["vidas"], nome1, jogador2["vidas"], nome2, level, dificuldade)
 
@@ -741,7 +744,7 @@ def executar_jogo():
     fonte = pygame.font.SysFont(None, 30)
     fonte_grande = pygame.font.SysFont(None, 72)
 
-    imagem_nave, imagem_meteoro, imagem_fundo = _carregar_imagens()
+    imagem_nave, imagem_nave2, imagens_meteoro, imagem_fundo = _carregar_imagens()
     sons = _carregar_sons()
 
     _tela_inicial(tela, fonte_grande, fonte)
@@ -758,7 +761,7 @@ def executar_jogo():
     while jogando:
         if modo == "Competicao":
             _loop_competicao(
-                tela, relogio, fonte, fonte_grande, imagem_nave, imagem_meteoro,
+                tela, relogio, fonte, fonte_grande, imagem_nave, imagem_nave2, imagens_meteoro,
                 imagem_fundo, sons, nome_jogador, nome_jogador2, dificuldade,
                 vel_min, vel_max, interv_inicial, interv_min, reducao, pts_por_segundo,
             )
@@ -778,7 +781,7 @@ def executar_jogo():
 
         if modo == "Cooperativo":
             _loop_cooperativo(
-                tela, relogio, fonte, fonte_grande, imagem_nave, imagem_meteoro,
+                tela, relogio, fonte, fonte_grande, imagem_nave, imagem_nave2, imagens_meteoro,
                 imagem_fundo, sons, nome_jogador, nome_jogador2, dificuldade,
                 vel_min, vel_max, interv_inicial, interv_min, reducao, pts_por_segundo,
             )
@@ -882,7 +885,7 @@ def executar_jogo():
             else:
                 tela.fill(AZUL_ESCURO)
 
-            desenhar_meteoros(tela, meteoros, imagem_meteoro)
+            desenhar_meteoros(tela, meteoros, imagens_meteoro)
             _atualizar_e_desenhar_particulas(tela, particulas)
             tempo_restante = jogador["invencivel_ate"] - agora
             if tempo_restante <= 0 or tempo_restante <= 1000 or (agora // 50) % 2 == 0:

@@ -54,7 +54,7 @@ def criar_meteoro(level=1, vel_min=None, vel_max=None):
         rect = pygame.Rect(LARGURA_TELA, ALTURA_TELA, tamanho, tamanho)
         vel_x, vel_y = -velocidade, -velocidade
 
-    return {"rect": rect, "vel_x": vel_x, "vel_y": vel_y, "tamanho": tamanho}
+    return {"rect": rect, "vel_x": vel_x, "vel_y": vel_y, "tamanho": tamanho, "img_idx": random.randint(0, 3)}
 
 
 def mover_meteoros(meteoros):
@@ -66,16 +66,12 @@ def mover_meteoros(meteoros):
     return [m for m in meteoros if m["rect"].colliderect(area_valida)]
 
 
-def desenhar_meteoros(tela, meteoros, imagem=None):
-    """Desenha cada meteoro como imagem ou círculo cinza se não houver imagem."""
+def desenhar_meteoros(tela, meteoros, imagens=None):
+    """Desenha cada meteoro com imagem aleatória ou círculo cinza."""
     for m in meteoros:
-        if imagem:
-            img = pygame.transform.scale(imagem, (m["tamanho"], m["tamanho"]))
+        if imagens:
+            idx = m.get("img_idx", 0) % len(imagens)
+            img = pygame.transform.scale(imagens[idx], (m["tamanho"], m["tamanho"]))
             tela.blit(img, m["rect"])
         else:
-            pygame.draw.circle(
-                tela,
-                (150, 100, 60),
-                m["rect"].center,
-                m["tamanho"] // 2,
-            )
+            pygame.draw.circle(tela, (150, 100, 60), m["rect"].center, m["tamanho"] // 2)
