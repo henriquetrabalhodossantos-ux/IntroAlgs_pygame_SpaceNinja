@@ -6,9 +6,11 @@ O jogo consiste em controlar uma nave espacial que deve sobreviver o maior tempo
 
 ## Integrantes do Grupo
 
-* Henrique Santos de Souza
-* Guilherme Henrique
-* Bruno Coutinho
+* Henrique Santos de Souza +
+* Guilherme Henrique -
+* Bruno Coutinho -
+* Kevin +
+* Leticia -
 
 ## Estrutura do Projeto
 
