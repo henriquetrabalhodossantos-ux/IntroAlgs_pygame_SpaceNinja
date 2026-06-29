@@ -338,6 +338,17 @@ def _tela_game_over(tela, fonte_grande, fonte, pontos, recorde):
     tela.blit(dica, (LARGURA_TELA // 2 - dica.get_width() // 2, ALTURA_TELA // 2 + 60))
     pygame.display.flip()
 
+    while True:
+        for evento in pygame.event.get():
+            if evento.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            if evento.type == pygame.KEYDOWN:
+                if evento.key == pygame.K_r:
+                    return True
+                if evento.key == pygame.K_ESCAPE:
+                    return False
+
 
 def _desenhar_jogador(tela, jogador, imagem_nave):
     if imagem_nave:
@@ -898,20 +909,11 @@ def executar_jogo():
 
         _parar_musica()
         _tocar(sons, "game_over")
-        _tela_game_over(tela, fonte_grande, fonte, jogador["pontos"], recorde)
+        jogar_novamente = _tela_game_over(tela, fonte_grande, fonte, jogador["pontos"], recorde)
+        if not jogar_novamente:
+            pygame.quit()
+            return
         dificuldade = _tela_dificuldade(tela, fonte_grande, fonte)
         vel_min, vel_max, interv_inicial, interv_min, reducao, pts_por_segundo = DIFICULDADES[dificuldade]
-        aguardando = True
-        while aguardando:
-            for evento in pygame.event.get():
-                if evento.type == pygame.QUIT:
-                    pygame.quit()
-                    return
-                if evento.type == pygame.KEYDOWN:
-                    if evento.key == pygame.K_r:
-                        aguardando = False
-                    if evento.key == pygame.K_ESCAPE:
-                        pygame.quit()
-                        return
 
     pygame.quit()
